@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import action
+from apiroutes.serializers import RouteSerializer
 
 
 class RoutesApi(APIView):
@@ -15,11 +16,12 @@ class RoutesApi(APIView):
             return Searoutes.objects.get(pk=pk)
         except Searoutes.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
-    def get(self,request,pk,format=None):   
+    def get(self,pk,request,format=None):   
         try:
             route=Searoutes.objects.get(pk=pk)
-            serializer = RoutesSerializer(route)
-            
+            serializer = RouteSerializer(route)
+            return Response(data=serializer.data,status=status.HTTP_202_ACCEPTED)
+
         except Searoutes.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
