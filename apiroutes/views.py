@@ -11,12 +11,7 @@ class RoutesApi(APIView):
     """
     Get a routes object from the database
     """
-    def get_object(self,request,pk,format=None):
-        try:
-            return Searoutes.objects.get(pk=pk)
-        except Searoutes.DoesNotExist:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-    def get(self,pk,request,format=None):   
+    def get(self,request,pk):   
         try:
             route=Searoutes.objects.get(pk=pk)
             serializer = RouteSerializer(route)
