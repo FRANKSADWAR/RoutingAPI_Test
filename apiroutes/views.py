@@ -51,8 +51,10 @@ class ApiRoutesGeos(APIView):
                             SELECT sea.id AS id, 
                             SUM(sea.length) AS length, 
                             SUM(dij.cost) as COST, ST_Collect(geom) AS geom 
-                            FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%source%, %target%) AS dij,                            
-                            searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id
+                            FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij,                            
+                            searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id;
                         """
+
+                        
 
 
