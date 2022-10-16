@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import action
-from apiroutes.serializers import RouteSerializer
+from apiroutes.serializers import RouteSerializer,RouteGeoSerializer
 import psycopg2
 
 
@@ -31,16 +31,15 @@ class RoutesApi(APIView):
     def get(self,request,pk):   
         try:
             route=Searoutes.objects.get(pk=pk)
-            serializer = RouteSerializer(route)
+            serializer = RouteGeoSerializer(route)
             return Response(data=serializer.data,status=status.HTTP_202_ACCEPTED)
 
         except Searoutes.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get_route(lat_1,lng_1,lat_2,lng_2):
-        pass        
+          
 
-
-
+class ApiRoutesGeos(APIView):
+    pass 
 
 
