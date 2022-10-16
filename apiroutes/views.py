@@ -40,6 +40,19 @@ class RoutesApi(APIView):
           
 
 class ApiRoutesGeos(APIView):
-    pass 
+    """
+    This API will use a raw SQL query to get the shortest path between two coordinates provided, using the
+    PgRouting extension and then return the path as GeoJSON
+    """
+    def get_route(request,start_lat,start_lng,end_lat,end_lng):
+        start_node = getNode(start_lng,start_lat)
+        end_node = getNode(end_lng,end_lat)
+        route_query =   """
+                            SELECT sea.id AS id, 
+                            SUM(sea.length) AS length, 
+                            SUM(dij.cost) as COST, ST_Collect(geom) AS geom 
+                            FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%source%, %target%) AS dij,                            
+                            searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id
+                        """
 
 
