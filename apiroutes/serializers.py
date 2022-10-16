@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apiroutes.models import Searoutes
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework_gis.fields import GeometryField
 
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,5 +12,5 @@ class RouteGeoSerializer(GeoFeatureModelSerializer):
     """ Serializing the route data as GeoJSON compatible data"""
     class Meta:
         model = Searoutes
-        geo_field = "linestring"
+        geo_field = "geom"
         fields = '__all__'
