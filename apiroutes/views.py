@@ -45,16 +45,23 @@ class ApiRoutesGeos(APIView):
     PgRouting extension and then return the path as GeoJSON
     """
     def get_route(request,start_lat,start_lng,end_lat,end_lng):
-        start_node = getNode(start_lng,start_lat)
-        end_node = getNode(end_lng,end_lat)
-        route_query =   """
+        try:
+
+            start_node = getNode(start_lng,start_lat)
+            end_node = getNode(end_lng,end_lat)
+            route_query =   """
                             SELECT sea.id AS id, 
                             SUM(sea.length) AS length, 
                             SUM(dij.cost) as COST, ST_Collect(geom) AS geom 
                             FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij,                            
                             searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id;
                         """
+        except:
+            pass                
+    ## call the cursor and obtain the data
+    ## call the serializet
+    # return the value     
 
-                        
+
 
 
