@@ -60,7 +60,7 @@ class ApiRoutesGeos(APIView):
         def custom_query():
             start_node = getNode(start_lng,start_lat)
             end_node = getNode(end_lng,end_lat)
-            route_query =  "SELECT sea.id AS id, SUM(sea.length) AS length, "
+            route_query =  "SELECT searoutes.fid AS id, SUM(sea.length) AS length, "
             route_query += "SUM(dij.cost) as COST, ST_AsText(ST_Collect(geom)) AS geom "
             route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
             route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
