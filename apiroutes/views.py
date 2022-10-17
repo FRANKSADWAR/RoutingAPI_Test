@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from apiroutes.models import Searoutes
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import action
-from apiroutes.serializers import RouteSerializer,RouteGeoSerializer
+from apiroutes.serializers import RouteSerializer,RouteGeoSerializer, CustomSerializer
 from django.core.serializers import serialize
 from django.db import connection
 import psycopg2
@@ -66,16 +67,15 @@ class ApiRoutesGeos(APIView):
             cursor.execute(route_query,[start_node,end_node])
             rows = dictfetchall(cursor)
             print (rows)
-                            
-        #route_data = Searoutes.objects.raw(route_query,[start_node,end_node])
-
-        route_data = serialize('geojson',rows)
-        return Response(data=route_data, status=status.HTTP_200_OK)            
-        
-        #return Response(status=status.HTTP_204_NO_CONTENT)                
-    ## call the cursor and obtain the data
-    ## call the serializet
-    # return the value     
+          
+        route_data = Searoutes.objects.raw(route_query,[start_node,end_node])
+        data = CustomSerializer(route_data)
+        #serializer = CustomSerializer(route_data)
+        return Response(data=data.data,status=status.HTTP_200_OK)
+      
+        #route_data = serialize('geojson',rows)
+        #return HttpResponse(data, content_type='json')            
+    
 
 
 
