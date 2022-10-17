@@ -23,3 +23,9 @@ class Searoutes(gis_models.Model):
     class Meta:
         verbose_name_plural='Sea Routes'
         db_table = 'searoutes'
+
+
+class MyData(models.Model):
+    name = models.CharField(max_length=90)
+    last = models.CharField(max_length=10)
+    

@@ -24,7 +24,7 @@ def getNode(x_coords,y_coords):
     point = cur.fetchone()
     return point        
 
-
+def 
 
 
 class RoutesApi(APIView):
