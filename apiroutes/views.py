@@ -24,6 +24,8 @@ def getNode(x_coords,y_coords):
     return point        
 
 
+
+
 class RoutesApi(APIView):
     """
     Get a routes object from the database
@@ -46,18 +48,21 @@ class ApiRoutesGeos(APIView):
     """
     def get_route(request,start_lat,start_lng,end_lat,end_lng):
         try:
-
             start_node = getNode(start_lng,start_lat)
             end_node = getNode(end_lng,end_lat)
-            route_query =   """
-                            SELECT sea.id AS id, 
-                            SUM(sea.length) AS length, 
-                            SUM(dij.cost) as COST, ST_Collect(geom) AS geom 
-                            FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij,                            
-                            searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id;
-                        """
+            route_query =  'SELECT sea.id AS id,'
+            route_query += 'SUM(sea.length) AS length,'
+            route_query += 'SUM(sea.length) AS length,'
+            route_query += 'SUM(dij.cost) as COST, ST_Collect(geom) AS geom' 
+            route_query += 'FROM pgr_dijkstra("SELECT id, source, target, cost FROM searoutes",%s, %s) AS dij,'                           
+            route_query += 'searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id;'
+                            
+            route_data = Searoutes.objects.raw(route_query,[start_node,end_node])
+
+            serializer = RouteGeoSerializer(route_data)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)            
         except:
-            pass                
+            return Response(status=status.HTTP_204_NO_CONTENT)                
     ## call the cursor and obtain the data
     ## call the serializet
     # return the value     
