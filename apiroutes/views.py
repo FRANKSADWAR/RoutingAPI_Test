@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import action
 from apiroutes.serializers import RouteSerializer,RouteGeoSerializer
+from django.core import serializers
 import psycopg2
 
 
@@ -46,7 +47,7 @@ class ApiRoutesGeos(APIView):
     This API will use a raw SQL query to get the shortest path between two coordinates provided, using the
     PgRouting extension and then return the path as GeoJSON
     """
-    def get_route(request,start_lat,start_lng,end_lat,end_lng):
+    def get(self,request,start_lat,start_lng,end_lat,end_lng):
         try:
             start_node = getNode(start_lng,start_lat)
             end_node = getNode(end_lng,end_lat)
@@ -59,8 +60,8 @@ class ApiRoutesGeos(APIView):
                             
             route_data = Searoutes.objects.raw(route_query,[start_node,end_node])
 
-            serializer = RouteGeoSerializer(route_data)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)            
+            serializer = serializers('geojson',route_data)
+            return Response(data=serializer, status=status.HTTP_200_OK)            
         except:
             return Response(status=status.HTTP_204_NO_CONTENT)                
     ## call the cursor and obtain the data
