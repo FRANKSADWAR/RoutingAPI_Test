@@ -1,3 +1,4 @@
+from dataclasses import fields
 from django.shortcuts import render
 from apiroutes.models import Searoutes
 from rest_framework.response import Response
@@ -39,7 +40,7 @@ class RoutesApi(APIView):
     """
     Get a routes object from the database
     """
-    def get(self,request,pk,format=None):   
+    def get(self,request,pk):   
         try:
             route=Searoutes.objects.get(pk=pk)
             serializer = RouteGeoSerializer(route)
@@ -57,10 +58,41 @@ class ApiRoutesGeos(APIView):
     """
     def get(self,request,start_lat,start_lng,end_lat,end_lng):
         
+        start_node = getNode(start_lng,start_lat)
+        end_node = getNode(end_lng,end_lat)
+        route_query =  "SELECT SUM(sea.length) AS length, "
+        route_query += "SUM(dij.cost) as COST, ST_Collect(geom) AS geom "
+        route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
+        route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
+
+        #with connection.cursor() as cursor:
+        #        cursor.execute(route_query,[start_node,end_node])
+        #        rows = dictfetchall(cursor)    
+        #        data = serialize('json',)
+
+
+        #return Response(data=CustomSerializer(rows).data,status=status.HTTP_200_OK)
+            
+          
+        route_data = Searoutes.objects.raw(route_query,params=[start_node,end_node])
+        #print(route_data)
+        route_info = CustomSerializer(route_data)
+        print(route_info)
+        #data = CustomSerializer(route_data)
+        #serializer = CustomSerializer(route_data)
+        #return Response(data=route_info.data,status=status.HTTP_200_OK)
+      
+        return Response(route_info.data, status=status.HTTP_200_OK, content_type='application/json')            
+    
+
+
+
+
+"""
         def custom_query():
             start_node = getNode(start_lng,start_lat)
             end_node = getNode(end_lng,end_lat)
-            route_query =  "SELECT searoutes.fid AS id, SUM(sea.length) AS length, "
+            route_query =  "SELECT sea.id AS id, SUM(sea.length) AS length, "
             route_query += "SUM(dij.cost) as COST, ST_AsText(ST_Collect(geom)) AS geom "
             route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
             route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
@@ -68,17 +100,6 @@ class ApiRoutesGeos(APIView):
                 cursor.execute(route_query,[start_node,end_node])
                 rows = dictfetchall(cursor)    
             return rows
-          
-        route_data = custom_query()
-        route_info = serialize('geojson',route_data)
-        #data = CustomSerializer(route_data)
-        #serializer = CustomSerializer(route_data)
-        return Response(data=route_info.data,status=status.HTTP_200_OK)
-      
-        
-        #return Response(route_info.data, status=status.HTTP_200_OK, content_type='json')            
-    
-
-
+        """
 
 
