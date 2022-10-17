@@ -24,6 +24,12 @@ def getNode(x_coords,y_coords):
     node_id = cur.fetchone()
     return node_id
 
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns,row))
+        for row in cursor.fetchall()
+    ]
 
 def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
     start_node = getNode(start_lng,start_lat)
@@ -34,10 +40,10 @@ def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
     route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
 
     try:
-        cur = conn.cursor()
-        cur.execute(route_query,(start_node,end_node))
-        data = cur.fetchall()
-        print(data)
+        with connection.cursor() as cursor:
+            cursor.execute(route_query,(start_node,end_node))
+            rows = dictfetchall(cursor)
+        return rows    
     except:
         logger.error('Error while executing the query')
         logger.error(traceback.format_exc())
