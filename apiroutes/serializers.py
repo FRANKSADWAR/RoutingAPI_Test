@@ -19,4 +19,4 @@ class CustomSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Searoutes
         geo_field = 'geom'
-        fields = ['cost','geom','id','length']        
+        fields = ['cost','geom','length']        
