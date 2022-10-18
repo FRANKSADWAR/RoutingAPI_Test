@@ -83,9 +83,6 @@ def getFeatures():
     route_data = FeatureCollection(route_result, distance=total_length, time=total_cost,node_coordinates=data[1] )
     print(route_data)
 
-
-
-
 if __name__=="__main__":
     ##get_shortestRoute(9.237,75.967,41.718,12.225)
     getFeatures()
