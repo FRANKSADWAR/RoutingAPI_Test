@@ -34,29 +34,38 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
-def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
+def get_shortestRoute(start_lat,start_lng,end_lat,end_lng,obstacles=False):
     local_vars = locals()
     #print(local_vars)
     start_coords = [local_vars['start_lat'],local_vars['start_lng']]
     end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+    start_node = getNode(start_lng,start_lat)
+    end_node = getNode(end_lng,end_lat)
+    
     coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
-    try:
-        start_node = getNode(start_lng,start_lat)
-        end_node = getNode(end_lng,end_lat)
-        route_query =  "SELECT SUM(sea.length) AS length, "
-        route_query += "SUM(dij.cost) as COST, ST_AsGeoJSON(sea.geom) AS geom "
-        route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
-        route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
-        with conn.cursor() as cursor:
-            cursor.execute(route_query,(start_node,end_node))
-            rows = cursor.fetchall()
+    
+    def getRoute():
+        try:
+            route_query =  "SELECT SUM(sea.length) AS length, "
+            route_query += "SUM(dij.cost) as COST, ST_AsGeoJSON(sea.geom) AS geom "
+            route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
+            route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
+            with conn.cursor() as cursor:
+                cursor.execute(route_query,(start_node,end_node))
+                rows = cursor.fetchall()
 
-        #print(rows)    
-        return [rows ,coordinates]
+            #print(rows)    
+            return [rows ,coordinates]
         
-    except:
-        logger.error('Error while executing the query')
-        logger.error(traceback.format_exc())
+        except:
+            logger.error('Error while executing the query')
+            logger.error(traceback.format_exc())
+    if obstacles == False:
+        getRoute()
+
+    elif obstacles == True:
+        pass
+
 
 def getFeatures():
     data = get_shortestRoute(9.237,75.967,41.718,12.225)

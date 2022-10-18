@@ -54,11 +54,12 @@ class RoutesApi(APIView):
 
 class ApiRoutesGeos(APIView):
     """
-    This API will use a raw SQL query to get the shortest path between two coordinates provided, using the
-    PgRouting extension and then return the path as GeoJSON
+    To use this API, simply input the coordinates of the starting point and the destination point, in latitude and longitude.
+    The start coordinates are designated as start_lat and start_lng, the destination coordinates are designated as end_lat and
+    end_lng.  This API will get the shortest path between the two pairs of coordinates provided, using the
+    and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
     
-
     def get_route_data(self,start_lat,start_lng,end_lat,end_lng):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['start_lng']]
@@ -70,7 +71,7 @@ class ApiRoutesGeos(APIView):
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
         route_query =  "SELECT SUM(sea.length) AS length, "
-        route_query += "SUM(dij.cost) as COST, ST_Collect(geom) AS geom "
+        route_query += "SUM(dij.cost) as COST, ST_AsGeoJSON(ST_Collect(geom)) AS geom "
         route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
         route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
 
@@ -80,7 +81,6 @@ class ApiRoutesGeos(APIView):
 
         ## return the SQL values from the query and also the feature        
         return [rows,coordinates]
-
 
     def get(self,request,start_lat,start_lng,end_lat,end_lng):
         data = self.get_route_data(start_lat,start_lng,end_lat,end_lng)
