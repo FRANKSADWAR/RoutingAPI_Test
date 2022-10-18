@@ -2,7 +2,7 @@
 In this test file, we will obtain the route from the database, and then get the
 results of the route as a GeoJSON result
 """
-from ast import arg
+
 from time import time
 from django.db import connection
 import psycopg2
