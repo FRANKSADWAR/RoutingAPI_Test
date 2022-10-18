@@ -2,11 +2,13 @@
 In this test file, we will obtain the route from the database, and then get the
 results of the route as a GeoJSON result
 """
+from ast import arg
 from django.db import connection
 import psycopg2
 #from apiroutes.models import Searoutes
 import logging
 import traceback
+from geojson import loads, Feature, FeatureCollection
 
 logger = logging.getLogger(__name__)
 database = 'testsdb'
@@ -32,24 +34,56 @@ def dictfetchall(cursor):
     ]
 
 def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
-    start_node = getNode(start_lng,start_lat)
-    end_node = getNode(end_lng,end_lat)
-    route_query =  "SELECT sea.id as id, SUM(sea.length) AS length, "
-    route_query += "SUM(dij.cost) as COST, ST_Collect(geom) AS geom "
-    route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
-    route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
-
+    local_vars = locals()
+    print(local_vars)
     try:
-        with connection.cursor() as cursor:
+        start_node = getNode(start_lng,start_lat)
+        end_node = getNode(end_lng,end_lat)
+        route_query =  "SELECT SUM(sea.length) AS length, "
+        route_query += "SUM(dij.cost) as COST, ST_AsGeoJSON(sea.geom) AS geom "
+        route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
+        route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
+        with conn.cursor() as cursor:
             cursor.execute(route_query,(start_node,end_node))
-            rows = dictfetchall(cursor)
-        return rows    
+            rows = cursor.fetchall()
+
+        #print(rows)    
+        return rows  
+        
     except:
         logger.error('Error while executing the query')
         logger.error(traceback.format_exc())
+
+def getFeatures():
+    data = get_shortestRoute(9.237,75.967,41.718,12.225)
+    route_args = locals()
+
+    route_result = []
+    total_length = []
+    total_cost = []
+    for segment in data:
+        length = segment[0]
+        cost = segment[1]
+        geom = segment[2]
+
+        total_length.append(length)
+        total_cost.append(cost)
+
+        geom_geojson = loads(geom)
+        segment_feature = Feature(geometry=geom_geojson,properties={})
+        route_result.append(segment_feature)
+
+    total_length = round(sum(total_length),3)
+    total_cost = round(sum(total_cost))          
+
+    ## Create a feature collection from the features returned
+    route_data = FeatureCollection(Feature(start_lat=route_args['start_lat'],start_lng=route_args['start_lng'],end_lat=route_args['end_lat'],end_lng=route_args['end_lng']),distance= total_length, time=total_cost)
+    return route_data
 
 
 
 
 if __name__=="__main__":
-    get_shortestRoute(9.237,75.967,41.718,12.225)
+    ## get_shortestRoute(9.237,75.967,41.718,12.225)
+    getFeatures()
+
