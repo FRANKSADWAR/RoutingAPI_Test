@@ -75,6 +75,7 @@ class ApiRoutesGeos(APIView):
         route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
         route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
 
+
         with connection.cursor() as cursor:
                 cursor.execute(route_query,(start_node,end_node))
                 rows = cursor.fetchall()
@@ -101,7 +102,7 @@ class ApiRoutesGeos(APIView):
 
         total_length = round(sum(total_length),4)
         total_cost = round(sum(total_cost),4)
-        route_data = FeatureCollection(route_result,distance=total_length,tome=total_cost,node_coordinates=data[1])
+        route_data = FeatureCollection(route_result,distance=total_length,time=total_cost,node_coordinates=data[1])
       
         return Response(route_data, status=status.HTTP_200_OK, content_type='application/json')            
     
