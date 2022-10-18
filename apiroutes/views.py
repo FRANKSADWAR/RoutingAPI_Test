@@ -84,27 +84,30 @@ class ApiRoutesGeos(APIView):
         return [rows,coordinates]
 
     def get(self,request,start_lat,start_lng,end_lat,end_lng):
-        data = self.get_route_data(start_lat,start_lng,end_lat,end_lng)
-        route_result = []
-        total_length = []
-        total_cost = []
+        try:
+            data = self.get_route_data(start_lat,start_lng,end_lat,end_lng)
+            route_result = []
+            total_length = []
+            total_cost = []
 
-        for segment in data[0]:
-            length = segment[0]
-            cost = segment[1]
-            total_length.append(length)
-            total_cost.append(cost)
+            for segment in data[0]:
+                length = segment[0]
+                cost = segment[1]
+                total_length.append(length)
+                total_cost.append(cost)
 
-            geom = segment[2]
-            geom_json = loads(geom)
-            segment_geom = Feature(geometry=geom_json)
-            route_result.append(segment_geom)
+                geom = segment[2]
+                geom_json = loads(geom)
+                segment_geom = Feature(geometry=geom_json)
+                route_result.append(segment_geom)
 
-        total_length = round(sum(total_length),4)
-        total_cost = round(sum(total_cost),4)
-        route_data = FeatureCollection(route_result,distance=total_length,time=total_cost,node_coordinates=data[1])
-      
-        return Response(route_data, status=status.HTTP_200_OK, content_type='application/json')            
-    
+            total_length = round(sum(total_length),4)
+            total_cost = round(sum(total_cost),4)
+            route_data = FeatureCollection(route_result,distance=total_length,time=total_cost,node_coordinates=data[1])
+        
+            return Response(route_data, status=status.HTTP_200_OK, content_type='application/json')  
+        except:
+            return Response(status=status.HTTP_204_NO_CONTENT)              
+        
 
 
