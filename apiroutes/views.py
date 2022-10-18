@@ -99,22 +99,11 @@ class ApiRoutesGeos(APIView):
             segment_geom = Feature(geometry=geom_json)
             route_result.append(segment_geom)
 
-            
-
-
-
-        #return Response(data=CustomSerializer(rows).data,status=status.HTTP_200_OK)
-            
-          
-        route_data = Searoutes.objects.raw(route_query,params=[start_node,end_node])
-        #print(route_data)
-        route_info = CustomSerializer(route_data)
-        print(route_info)
-        #data = CustomSerializer(route_data)
-        #serializer = CustomSerializer(route_data)
-        #return Response(data=route_info.data,status=status.HTTP_200_OK)
+        total_length = round(sum(total_length),4)
+        total_cost = round(sum(total_cost),4)
+        route_data = FeatureCollection(route_result,distance=total_length,tome=total_cost,node_coordinates=data[1])
       
-        return Response(route_info.data, status=status.HTTP_200_OK, content_type='application/json')            
+        return Response(route_data, status=status.HTTP_200_OK, content_type='application/json')            
     
 
 
