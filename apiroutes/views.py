@@ -10,6 +10,7 @@ from apiroutes.serializers import RouteSerializer,RouteGeoSerializer, CustomSeri
 from django.core.serializers import serialize
 from django.db import connection
 import psycopg2
+from geojson import loads, Feature, FeatureCollection
 
 
 database = 'testsdb'
@@ -56,8 +57,16 @@ class ApiRoutesGeos(APIView):
     This API will use a raw SQL query to get the shortest path between two coordinates provided, using the
     PgRouting extension and then return the path as GeoJSON
     """
-    def get(self,request,start_lat,start_lng,end_lat,end_lng):
-        
+    
+
+    def get_route_data(self,start_lat,start_lng,end_lat,end_lng):
+        local_vars = locals()
+        start_coords = [local_vars['start_lat'],local_vars['start_lng']]
+        end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+
+        coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
+
+
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
         route_query =  "SELECT SUM(sea.length) AS length, "
@@ -65,10 +74,33 @@ class ApiRoutesGeos(APIView):
         route_query += "FROM pgr_dijkstra('SELECT id, source, target, cost FROM searoutes',%s, %s) AS dij, "                          
         route_query += "searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id "
 
-        #with connection.cursor() as cursor:
-        #        cursor.execute(route_query,[start_node,end_node])
-        #        rows = dictfetchall(cursor)    
-        #        data = serialize('json',)
+        with connection.cursor() as cursor:
+                cursor.execute(route_query,(start_node,end_node))
+                rows = cursor.fetchall()
+
+        ## return the SQL values from the query and also the feature        
+        return [rows,coordinates]
+
+
+    def get(self,request,start_lat,start_lng,end_lat,end_lng):
+        data = self.get_route_data(start_lat,start_lng,end_lat,end_lng)
+        route_result = []
+        total_length = []
+        total_cost = []
+
+        for segment in data[0]:
+            length = segment[0]
+            cost = segment[1]
+            total_length.append(length)
+            total_cost.append(cost)
+
+            geom = segment[2]
+            geom_json = loads(geom)
+            segment_geom = Feature(geometry=geom_json)
+            route_result.append(segment_geom)
+
+            
+
 
 
         #return Response(data=CustomSerializer(rows).data,status=status.HTTP_200_OK)
