@@ -4,9 +4,8 @@ in the path function
 """
 
 class FloatUrlParameterConverter:
-    regex = '[-+]?\d+(\.\d+)?'
+    regex = '[-+]?\d+(\.\d+)'
     
-
     def to_python(self,value):
         return float(value)
 
