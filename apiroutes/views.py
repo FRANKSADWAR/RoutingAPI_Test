@@ -105,9 +105,9 @@ class ApiRoutesGeos(APIView):
             total_cost = round(sum(total_cost),4)
             route_data = FeatureCollection(route_result,distance=total_length,time=total_cost,node_coordinates=data[1])
         
-            return Response(route_data, status=status.HTTP_200_OK, content_type='application/json')  
+            return Response(route_data, status=status.HTTP_201_CREATED, content_type='application/json')  
         except:
-            return Response(status=status.HTTP_204_NO_CONTENT)              
+            return Response(status=status.HTTP_400_BAD_REQUEST)              
         
 
 
