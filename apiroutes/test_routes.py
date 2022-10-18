@@ -3,6 +3,7 @@ In this test file, we will obtain the route from the database, and then get the
 results of the route as a GeoJSON result
 """
 from ast import arg
+from time import time
 from django.db import connection
 import psycopg2
 #from apiroutes.models import Searoutes
@@ -35,7 +36,10 @@ def dictfetchall(cursor):
 
 def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
     local_vars = locals()
-    print(local_vars)
+    #print(local_vars)
+    start_coords = [local_vars['start_lat'],local_vars['start_lng']]
+    end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+    coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
     try:
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
@@ -48,7 +52,7 @@ def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
             rows = cursor.fetchall()
 
         #print(rows)    
-        return rows  
+        return [rows ,coordinates]
         
     except:
         logger.error('Error while executing the query')
@@ -56,12 +60,10 @@ def get_shortestRoute(start_lat,start_lng,end_lat,end_lng):
 
 def getFeatures():
     data = get_shortestRoute(9.237,75.967,41.718,12.225)
-    route_args = locals()
-
     route_result = []
     total_length = []
     total_cost = []
-    for segment in data:
+    for segment in data[0]:
         length = segment[0]
         cost = segment[1]
         geom = segment[2]
@@ -70,20 +72,21 @@ def getFeatures():
         total_cost.append(cost)
 
         geom_geojson = loads(geom)
-        segment_feature = Feature(geometry=geom_geojson,properties={})
+        segment_feature = Feature(geometry=geom_geojson)
         route_result.append(segment_feature)
 
     total_length = round(sum(total_length),3)
     total_cost = round(sum(total_cost))          
 
     ## Create a feature collection from the features returned
-    route_data = FeatureCollection(Feature(start_lat=route_args['start_lat'],start_lng=route_args['start_lng'],end_lat=route_args['end_lat'],end_lng=route_args['end_lng']),distance= total_length, time=total_cost)
-    return route_data
+
+    route_data = FeatureCollection(route_result, distance=total_length, time=total_cost,node_coordinates=data[1] )
+    print(route_data)
 
 
 
 
 if __name__=="__main__":
-    ## get_shortestRoute(9.237,75.967,41.718,12.225)
+    ##get_shortestRoute(9.237,75.967,41.718,12.225)
     getFeatures()
 
