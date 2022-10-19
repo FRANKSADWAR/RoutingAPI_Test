@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'apiroutes',
+    'drf_yasg',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'rest_framework',
     'rest_framework_gis',
-    'drf_yasg',
+    
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'routes.urls'
+
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False
+}
 
 TEMPLATES = [
     {
