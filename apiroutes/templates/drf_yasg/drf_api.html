@@ -3,3 +3,13 @@
 {% block favicon%}
     <link rel="shortcut icon" href="{% static 'imgs/ship.png' %}" type="image/x-icon">
 {% endblock %}
+
+{% block extra_body %}
+    <div id="testarea">
+        <p>
+            This is the Sea Routing API for the Voyager service. It allows you to obtain the 
+            sea routes using the sea rout network by simply passing in the start coordinates and the 
+            end coordinates as the parameters. 
+        </p>
+    </div>
+{% endblock %}
