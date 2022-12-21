@@ -8,6 +8,6 @@ register_converter(converters.FloatUrlParameterConverter,'float')
 
 urlpatterns = [
     path('routes/<int:pk>/',RoutesApi.as_view()),
-    path('params/<float:start_lat>/<float:start_lng>/<float:end_lat>/<float:end_lng>/suez/',ApiRoutesGeos.as_view()),
+    path('params/<float:start_lat>/<float:start_lng>/<float:end_lat>/<float:end_lng>/',ApiRoutesGeos.as_view()),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

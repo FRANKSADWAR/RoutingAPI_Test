@@ -59,15 +59,64 @@ class ApiRoutesGeos(APIView):
     end_lng.  This API will get the shortest path between the two pairs of coordinates provided, using the
     and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
-    def get_route_dataset(self, start_lat,start_lng,end_lat,end_lng,*args,suez,panama,singapore):
+    def get_route_dataset(self, start_lat,start_lng,end_lat,end_lng,*args,suez=False,panama=False,singapore=False):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+        
+        start_node = getNode(start_lng,start_lat)
+        end_node = getNode(end_lng,end_lat)
+
+        if (suez == False) and (panama==False) and (singapore==False):
+            pass 
+        if (suez == False) and (panama == True):
+            pass
+
+
+
+
+
+
+    def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
+        var_args = locals()
+        print(var_args['suez'],var_args['panama'],var_args['singapore'])
+
+        route_options = Feature(options={'suez':var_args['suez'],'panama':var_args['panama'],'singapore':var_args['singapore']})
+        print(route_options)
+        if (suez==False) and (panama==False) and (singapore==False):
+            print('all false')
+            
+        if(suez==True) and (panama == True) and (singapore==True):
+            print('all true')
+            
+        if (suez == True) and (panama==False) and (singapore==False):
+            print('only suez true')
+            
+        if (suez == True) and (panama==True) and (singapore==False):
+            print('suez and panama true')
+            
+        if(suez == False) and (panama == False) and (singapore==True):
+            print('only singapore true')
+            
+        if(suez == False) and (panama == True) and (singapore == False):
+            print('only panama true')
+
+        if(suez == True) and (panama==False) and (singapore==True):
+            print('suez and singapore true')
+
+        if(suez==False) and (panama==True) and (singapore==True):
+            print('panama and singapore true')
+
+    
+
+
+
+
+
 
 
     
-    
-    def get_route_data(self,start_lat,start_lng,end_lat,end_lng,*args,suez):
+    def get_route_data(self,start_lat,start_lng,end_lat,end_lng):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['start_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
@@ -75,6 +124,7 @@ class ApiRoutesGeos(APIView):
         ##print(to_coords)
 
         coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
+
 
 
         start_node = getNode(start_lng,start_lat)
