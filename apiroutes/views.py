@@ -59,7 +59,7 @@ class ApiRoutesGeos(APIView):
     end_lng.  This API will get the shortest path between the two pairs of coordinates provided, using the
     and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
-    def get_route_dataset(self, start_lat,start_lng,end_lat,end_lng,*args,suez=False,panama=False,singapore=False):
+    def test_route_options(self, start_lat, start_lng, end_lat, end_lng, *args,suez=False,panama=False,singapore=False):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
@@ -67,22 +67,22 @@ class ApiRoutesGeos(APIView):
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
 
-        if (suez == False) and (panama==False) and (singapore==False):
-            pass 
-        if (suez == False) and (panama == True):
-            pass
 
+        query_url = """ WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length,SUM (dij.cost) AS cost, ST_Collect(sea.geom) AS geom FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,reverse_cost
+                        FROM searoutes_noded_noded',%s,%s) AS dij,searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id) SELECT route_dij.id,route_dij.cost, ST_AsGeoJSON(route_dij.geom) AS the_geom,
+                        route_dij.length,(SELECT SUM(ST_Length( (ST_Intersection(route.geom,eca.geom))::geography)/1852)
+                        FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij
+                    """
 
+        query_ = " WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length, "
+        query_ +=  "SUM (dij.cost) AS cost, ST_Collect(sea.geom) AS geom "
+        query_ +=  "FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,reverse_cost "
+        query_ += "FROM searoutes_noded_noded',%s,%s) AS dij, "
+        query_ += " searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id) SELECT route_dij.id,"
+        query_ +=  " route_dij.cost, ST_AsGeoJSON(route_dij.geom) AS the_geom, "          
+        query_ += "route_dij.length,(SELECT SUM(ST_Length( (ST_Intersection(route.geom,eca.geom))::geography)/1852)"        
+        query_ += " FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij"
 
-
-
-
-    def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
-        var_args = locals()
-        print(var_args['suez'],var_args['panama'],var_args['singapore'])
-
-        route_options = Feature(options={'suez':var_args['suez'],'panama':var_args['panama'],'singapore':var_args['singapore']})
-        print(route_options)
         if (suez==False) and (panama==False) and (singapore==False):
             print('all false')
             
@@ -106,6 +106,19 @@ class ApiRoutesGeos(APIView):
 
         if(suez==False) and (panama==True) and (singapore==True):
             print('panama and singapore true')
+
+
+
+
+
+
+    def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
+        var_args = locals()
+        print(var_args['suez'],var_args['panama'],var_args['singapore'])
+
+        route_options = Feature(options={'suez':var_args['suez'],'panama':var_args['panama'],'singapore':var_args['singapore']})
+        print(route_options)
+        
 
     
 
