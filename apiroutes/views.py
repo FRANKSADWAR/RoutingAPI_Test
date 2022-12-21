@@ -59,13 +59,20 @@ class ApiRoutesGeos(APIView):
     end_lng.  This API will get the shortest path between the two pairs of coordinates provided, using the
     and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
+    def get_route_dataset(self, start_lat,start_lng,end_lat,end_lng,*args,suez,panama,singapore):
+        local_vars = locals()
+        start_coords = [local_vars['start_lat'],local_vars['end_lng']]
+        end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+
+
+    
     
     def get_route_data(self,start_lat,start_lng,end_lat,end_lng,*args,suez):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['start_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
-        to_coords = local_vars['args']
-        print(to_coords)
+        ##to_coords = local_vars['args']
+        ##print(to_coords)
 
         coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
 
