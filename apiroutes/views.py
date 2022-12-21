@@ -13,14 +13,14 @@ import psycopg2
 from geojson import loads, Feature, FeatureCollection
 
 
-database = 'testsdb'
+database = 'searouting'
 user='postgres'
 password='RootRender90'
 
 conn = psycopg2.connect(database=database,user=user,password=password)
 def getNode(x_coords,y_coords):
     query = """
-            SELECT id FROM searoutes_vertices_pgr ORDER BY 
+            SELECT id FROM searoutes_noded_noded_vertices_pgr ORDER BY 
             the_geom <-> ST_SetSRID(ST_MakePoint(%s, %s),4326) LIMIT 1;
             """
     cur = conn.cursor()
@@ -60,10 +60,12 @@ class ApiRoutesGeos(APIView):
     and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
     
-    def get_route_data(self,start_lat,start_lng,end_lat,end_lng):
+    def get_route_data(self,start_lat,start_lng,end_lat,end_lng,*args,suez):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['start_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+        to_coords = local_vars['args']
+        print(to_coords)
 
         coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
 
