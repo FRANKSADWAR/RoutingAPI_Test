@@ -21,7 +21,7 @@ def funct(**args):
 
 ## both the normal arguments, the * and the ** can be combined
 def functi(a, *pargs,**kwargs):
-    print(a,pargs,kwargs)
+    print(a,pargs,kargs)
 
 ## keyword-only arguments with defaults are optional, but those without defaults effectively become required keywords for the function
 def kwonly(a,*args,b,c='spam'):
