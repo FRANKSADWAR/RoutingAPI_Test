@@ -11,7 +11,9 @@ from django.core.serializers import serialize
 from django.db import connection
 import psycopg2
 from geojson import loads, Feature, FeatureCollection
+import logging
 
+logger = logging.getLogger(__name__)
 
 database = 'searouting'
 user='postgres'
@@ -59,7 +61,7 @@ class ApiRoutesGeos(APIView):
     end_lng.  This API will get the shortest path between the two pairs of coordinates provided, using the
     and then return the route data as GeoJSON. Further improvements will include avoidance of obstacles such as High Risk Areas (HRA)
     """
-    def test_route_options(self, start_lat, start_lng, end_lat, end_lng, *args,suez=False,panama=False,singapore=False):
+    def test_route_options(self, start_lat, start_lng, end_lat, end_lng,*args,suez=False,panama=False,singapore=False):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
@@ -138,6 +140,14 @@ class ApiRoutesGeos(APIView):
                             FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij
                         """
 
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(query_url,(start_node,end_node))
+                rows = cursor.fetchall()
+            return [rows, coordinates]   
+        except:
+            logger.error('Error while exceuting the query,try again later')
+            logger.error(traceback.format_exc())
 
     def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
         var_args = locals()
