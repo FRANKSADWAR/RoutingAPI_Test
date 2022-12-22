@@ -164,7 +164,7 @@ def test_route_options(start_lat, start_lng, end_lat, end_lng,*args,suez=False,p
 
 
 if __name__=="__main__":
-    test_route_options(40.747,-74.003,-4.051,39.705, suez=False,panama=True,singapore=True)
+    testvals = test_route_options(40.747,-74.003,-4.051,39.705, suez=False,panama=True,singapore=True)
 
         
     
