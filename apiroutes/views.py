@@ -84,7 +84,7 @@ class ApiRoutesGeos(APIView):
         query_ += " FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij"
 
         if (suez==False) and (panama==False) and (singapore==False):
-            query_url = query_url
+            query_url = query_url  ## this is the case when they are are all false, meaning to ignore them in the routing
 
         if(suez==True) and (panama == True) and (singapore==True):
             query_url = """ WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length,SUM (dij.cost) AS cost, ST_Collect(sea.geom) AS geom FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,
@@ -97,11 +97,21 @@ class ApiRoutesGeos(APIView):
             
         if (suez == True) and (panama==False) and (singapore==False):
             print('only suez true')
-            query_url = """
+            query_url = """WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length, SUM(dij.cost) AS cost, ST_Collect(sea.geom) AS geom FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,
+                            reverse_cost FROM avoid_suez_canal',%s,%s) AS dij, avoid_suez_canal AS sea WHERE dij.edge = sea.id GROUP BY sea.id) SELECT route_dij.id,route_dij.cost, 
+                            ST_AsGeoJSON(route_dij.geom) AS the_geom,
+                            route_dij.length, (SELECT SUM(ST_Length((ST_Intersection(route.geom,eca.geom))::geography)/1852)
+                            FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij
                         """
             
         if (suez == True) and (panama==True) and (singapore==False):
             print('suez and panama true')
+            query_url = """WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length, SUM(dij.cost) AS cost, ST_Collect(sea.geom) AS geom FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,
+                            reverse_cost FROM avoid_suez_canal',%s,%s) AS dij, avoid_suez_canal AS sea WHERE dij.edge = sea.id GROUP BY sea.id) SELECT route_dij.id,route_dij.cost, 
+                            ST_AsGeoJSON(route_dij.geom) AS the_geom,
+                            route_dij.length, (SELECT SUM(ST_Length((ST_Intersection(route.geom,eca.geom))::geography)/1852)
+                            FROM eca_areas AS eca, route_dij AS route WHERE ST_Intersects(route.geom,eca.geom)) AS eca_distance FROM route_dij
+                        """
             
         if(suez == False) and (panama == False) and (singapore==True):
             print('only singapore true')
