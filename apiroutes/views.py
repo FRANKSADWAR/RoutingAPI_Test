@@ -11,7 +11,7 @@ from django.core.serializers import serialize
 from django.db import connection
 import psycopg2
 from geojson import loads, Feature, FeatureCollection
-import logging
+import logging, traceback
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,8 @@ class ApiRoutesGeos(APIView):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
+
+        coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
         
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
@@ -148,6 +150,10 @@ class ApiRoutesGeos(APIView):
         except:
             logger.error('Error while exceuting the query,try again later')
             logger.error(traceback.format_exc())
+
+
+
+
 
     def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
         var_args = locals()
