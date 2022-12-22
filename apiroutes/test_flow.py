@@ -70,37 +70,8 @@ When an argument name appears before the *args, it is possibly default positiona
 def f(a,*b,c=6,**d):
     print(a,b,c,d)
 
-def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
-    var_args = locals()
-    print(var_args['suez'],var_args['panama'],var_args['singapore'])
 
-    route_options = Feature(options={'suez':var_args['suez'],'panama':var_args['panama'],'singapore':var_args['singapore']})
-    print(route_options)
-    if (suez==False) and (panama==False) and (singapore==False):
-        print('all false')
-        
-    if(suez==True) and (panama == True) and (singapore==True):
-        print('all true')
-        
-    if (suez == True) and (panama==False) and (singapore==False):
-        print('only suez true')
-        
-    if (suez == True) and (panama==True) and (singapore==False):
-        print('suez and panama true')
-        
-    if(suez == False) and (panama == False) and (singapore==True):
-        print('only singapore true')
-        
-    if(suez == False) and (panama == True) and (singapore == False):
-        print('only panama true')
-
-    if(suez == True) and (panama==False) and (singapore==True):
-        print('suez and singapore true')
-
-    if(suez==False) and (panama==True) and (singapore==True):
-        print('panama and singapore true')
-
-def test_route_options(self, start_lat, start_lng, end_lat, end_lng,*args,suez=False,panama=False,singapore=False):
+def test_route_options(start_lat, start_lng, end_lat, end_lng,*args,suez=False,panama=False,singapore=False):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
@@ -189,6 +160,9 @@ def test_route_options(self, start_lat, start_lng, end_lat, end_lng,*args,suez=F
         except:
             logger.error('Error while exceuting the query,try again later')
             logger.error(traceback.format_exc())
+
+
+
 if __name__=="__main__":
     test_routes(4567,1223,suez=False,panama=True,singapore=True)
 
