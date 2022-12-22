@@ -65,12 +65,12 @@ class ApiRoutesGeos(APIView):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['end_lng']]
         end_coords = [local_vars['end_lat'],local_vars['end_lng']]
-
         coordinates = Feature(properties={'start_coordinates':start_coords,'end_coordinates':end_coords})
-        
         start_node = getNode(start_lng,start_lat)
         end_node = getNode(end_lng,end_lat)
 
+        options = local_vars['args']
+        
         query_url = """ WITH route_dij AS (SELECT sea.id AS id, SUM(sea.length) AS length,SUM (dij.cost) AS cost, ST_Collect(sea.geom) AS geom FROM pgr_astar('SELECT id,source,target,cost,x1,y1,x2,y2,reverse_cost
                         FROM searoutes_noded_noded',%s,%s) AS dij,searoutes AS sea WHERE dij.edge = sea.id GROUP BY sea.id) SELECT route_dij.id,route_dij.cost, ST_AsGeoJSON(route_dij.geom) AS the_geom,
                         route_dij.length,(SELECT SUM(ST_Length( (ST_Intersection(route.geom,eca.geom))::geography)/1852)
@@ -152,26 +152,6 @@ class ApiRoutesGeos(APIView):
             logger.error(traceback.format_exc())
 
 
-
-
-
-    def test_routes(start,end,*args,suez=False,panama=False,singapore=False):
-        var_args = locals()
-        print(var_args['suez'],var_args['panama'],var_args['singapore'])
-
-        route_options = Feature(options={'suez':var_args['suez'],'panama':var_args['panama'],'singapore':var_args['singapore']})
-        print(route_options)
-        
-
-    
-
-
-
-
-
-
-
-    
     def get_route_data(self,start_lat,start_lng,end_lat,end_lng):
         local_vars = locals()
         start_coords = [local_vars['start_lat'],local_vars['start_lng']]
@@ -198,9 +178,9 @@ class ApiRoutesGeos(APIView):
         ## return the SQL values from the query and also the feature        
         return [rows,coordinates]
 
-    def get(self,request,start_lat,start_lng,end_lat,end_lng):
+    def get(self,request,start_lat,start_lng,end_lat,end_lng,*args,suez=False,panama=False,singapore=False):
         try:
-            data = self.get_route_data(start_lat,start_lng,end_lat,end_lng)
+            data = self.test_route_options(start_lat,start_lng,end_lat,end_lng,suez=False,panama=True,singapore=False)
             route_result = []
             total_length = []
             total_cost = []
